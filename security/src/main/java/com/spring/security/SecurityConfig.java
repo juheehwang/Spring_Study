@@ -2,6 +2,7 @@ package com.spring.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.userdetails.User;
@@ -36,8 +37,21 @@ public class SecurityConfig {
 //                .permitAll()
 //            );
         // http basic version
+//        http.authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
+//            .httpBasic(basic -> basic.authenticationEntryPoint(new CustomAuthenticationEntryPoint()));
+
+        // remember me test
         http.authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
-            .httpBasic(basic -> basic.authenticationEntryPoint(new CustomAuthenticationEntryPoint()));
+            .formLogin(Customizer.withDefaults())
+            .rememberMe(rememberMe -> rememberMe
+               // .alwaysRemember(true)
+                .tokenValiditySeconds(3600)
+                .userDetailsService(userDetailsService())
+                .rememberMeParameter("remember")
+                .rememberMeCookieName("remember")
+                .key("security")
+            );
+
 
         return http.build();
     }
