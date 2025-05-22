@@ -20,4 +20,9 @@ public class IndexController {
     public String home(){
         return "home~~~";
     }
+
+    @GetMapping("/logoutSuccess")
+    public String logoutSuccess(){
+        return "logoutSuccess~~~!!";
+    }
 }

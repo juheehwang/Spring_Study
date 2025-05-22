@@ -1,15 +1,25 @@
 package com.spring.security;
 
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+import java.io.IOException;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.logout.LogoutHandler;
+import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 @EnableWebSecurity
 @Configuration
@@ -41,17 +51,47 @@ public class SecurityConfig {
 //            .httpBasic(basic -> basic.authenticationEntryPoint(new CustomAuthenticationEntryPoint()));
 
         // remember me test
+//        http.authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
+//            .formLogin(Customizer.withDefaults())
+//            .rememberMe(rememberMe -> rememberMe
+//               // .alwaysRemember(true)
+//                .tokenValiditySeconds(3600)
+//                .userDetailsService(userDetailsService())
+//                .rememberMeParameter("remember")
+//                .rememberMeCookieName("remember")
+//                .key("security")
+//            );
+
+        // logout test
         http.authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
             .formLogin(Customizer.withDefaults())
-            .rememberMe(rememberMe -> rememberMe
-               // .alwaysRemember(true)
-                .tokenValiditySeconds(3600)
-                .userDetailsService(userDetailsService())
-                .rememberMeParameter("remember")
-                .rememberMeCookieName("remember")
-                .key("security")
+            .logout(logout -> logout
+                .logoutUrl("/logoutProc")
+                .logoutRequestMatcher(new AntPathRequestMatcher("/logoutProc", "POST")) // 이게 logoutUrl 보다 우선됨 - post를 명시안하면 어떤 method 든 가능
+                .logoutSuccessUrl("/logoutSuccess") //이게 동작하려면 requestMatchers() 에 등록해야함
+                .logoutSuccessHandler(new LogoutSuccessHandler() {
+                    @Override
+                    public void onLogoutSuccess(HttpServletRequest request,
+                        HttpServletResponse response, Authentication authentication)
+                        throws IOException, ServletException {
+                        response.sendRedirect("/logoutSuccess");
+                    }
+                }) //이게 logoutSuccessUrl 보다 우선 실행된다
+                .deleteCookies("JSESSIONID")
+                .invalidateHttpSession(true)
+                .clearAuthentication(true)
+                .addLogoutHandler(new LogoutHandler() {
+                    @Override
+                    public void logout(HttpServletRequest request, HttpServletResponse response,
+                        Authentication authentication) {
+                        HttpSession session = request.getSession();
+                        session.invalidate();
+                        SecurityContextHolder.getContextHolderStrategy().getContext().setAuthentication(null);
+                        SecurityContextHolder.getContextHolderStrategy().clearContext();
+                    }
+                })
+                .permitAll()
             );
-
 
         return http.build();
     }
