@@ -19,6 +19,7 @@ import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
+import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 @EnableWebSecurity
@@ -63,35 +64,43 @@ public class SecurityConfig {
 //            );
 
         // logout test
-        http.authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
-            .formLogin(Customizer.withDefaults())
-            .logout(logout -> logout
-                .logoutUrl("/logoutProc")
-                .logoutRequestMatcher(new AntPathRequestMatcher("/logoutProc", "POST")) // 이게 logoutUrl 보다 우선됨 - post를 명시안하면 어떤 method 든 가능
-                .logoutSuccessUrl("/logoutSuccess") //이게 동작하려면 requestMatchers() 에 등록해야함
-                .logoutSuccessHandler(new LogoutSuccessHandler() {
-                    @Override
-                    public void onLogoutSuccess(HttpServletRequest request,
-                        HttpServletResponse response, Authentication authentication)
-                        throws IOException, ServletException {
-                        response.sendRedirect("/logoutSuccess");
-                    }
-                }) //이게 logoutSuccessUrl 보다 우선 실행된다
-                .deleteCookies("JSESSIONID")
-                .invalidateHttpSession(true)
-                .clearAuthentication(true)
-                .addLogoutHandler(new LogoutHandler() {
-                    @Override
-                    public void logout(HttpServletRequest request, HttpServletResponse response,
-                        Authentication authentication) {
-                        HttpSession session = request.getSession();
-                        session.invalidate();
-                        SecurityContextHolder.getContextHolderStrategy().getContext().setAuthentication(null);
-                        SecurityContextHolder.getContextHolderStrategy().clearContext();
-                    }
-                })
-                .permitAll()
-            );
+//        http.authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
+//            .formLogin(Customizer.withDefaults())
+//            .logout(logout -> logout
+//                .logoutUrl("/logoutProc")
+//                .logoutRequestMatcher(new AntPathRequestMatcher("/logoutProc", "POST")) // 이게 logoutUrl 보다 우선됨 - post를 명시안하면 어떤 method 든 가능
+//                .logoutSuccessUrl("/logoutSuccess") //이게 동작하려면 requestMatchers() 에 등록해야함
+//                .logoutSuccessHandler(new LogoutSuccessHandler() {
+//                    @Override
+//                    public void onLogoutSuccess(HttpServletRequest request,
+//                        HttpServletResponse response, Authentication authentication)
+//                        throws IOException, ServletException {
+//                        response.sendRedirect("/logoutSuccess");
+//                    }
+//                }) //이게 logoutSuccessUrl 보다 우선 실행된다
+//                .deleteCookies("JSESSIONID")
+//                .invalidateHttpSession(true)
+//                .clearAuthentication(true)
+//                .addLogoutHandler(new LogoutHandler() {
+//                    @Override
+//                    public void logout(HttpServletRequest request, HttpServletResponse response,
+//                        Authentication authentication) {
+//                        HttpSession session = request.getSession();
+//                        session.invalidate();
+//                        SecurityContextHolder.getContextHolderStrategy().getContext().setAuthentication(null);
+//                        SecurityContextHolder.getContextHolderStrategy().clearContext();
+//                    }
+//                })
+//                .permitAll()
+//            );
+
+        // 기본
+        HttpSessionRequestCache requestCache = new HttpSessionRequestCache();
+        requestCache.setMatchingRequestParameterName("customParam=y");
+        http.authorizeHttpRequests(auth -> auth
+            .requestMatchers("/logoutSuccess").permitAll()
+            .anyRequest().authenticated())
+            .formLogin(Customizer.withDefaults());
 
         return http.build();
     }
