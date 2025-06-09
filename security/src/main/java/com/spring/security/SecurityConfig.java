@@ -100,19 +100,23 @@ public class SecurityConfig {
         http.authorizeHttpRequests(auth -> auth
             .requestMatchers("/logoutSuccess").permitAll()
             .anyRequest().authenticated())
-            .authenticationProvider(new CustomerAuthenticationProvider())
-            .authenticationProvider(new CustomerAuthenticationProvider2())
+       //     .authenticationProvider(new CustomerAuthenticationProvider())
+//            .authenticationProvider(new CustomerAuthenticationProvider2())
             .formLogin(Customizer.withDefaults());
 
         return http.build();
     }
 
-  
+
     @Bean
     public UserDetailsService userDetailsService(){
-        UserDetails user = User.withUsername("user")
-            .password("{noop}1111")
-            .roles("USER").build();
-        return new InMemoryUserDetailsManager(user);
+        return new CustomUserDetailsService();
     }
+//    @Bean
+//    public UserDetailsService userDetailsService(){
+//        UserDetails user = User.withUsername("user")
+//            .password("{noop}1111")
+//            .roles("USER").build();
+//        return new InMemoryUserDetailsManager(user);
+//    }
 }
