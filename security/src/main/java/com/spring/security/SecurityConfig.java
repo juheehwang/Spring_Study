@@ -7,7 +7,9 @@ import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.Authentication;
@@ -95,16 +97,17 @@ public class SecurityConfig {
 //            );
 
         // 기본
-        HttpSessionRequestCache requestCache = new HttpSessionRequestCache();
-        requestCache.setMatchingRequestParameterName("customParam=y");
         http.authorizeHttpRequests(auth -> auth
             .requestMatchers("/logoutSuccess").permitAll()
             .anyRequest().authenticated())
+            .authenticationProvider(new CustomerAuthenticationProvider())
+            .authenticationProvider(new CustomerAuthenticationProvider2())
             .formLogin(Customizer.withDefaults());
 
         return http.build();
     }
 
+  
     @Bean
     public UserDetailsService userDetailsService(){
         UserDetails user = User.withUsername("user")
