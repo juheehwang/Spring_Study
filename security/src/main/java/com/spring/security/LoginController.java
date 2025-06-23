@@ -18,24 +18,24 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class LoginController {
 
-    private final AuthenticationManager authenticationManager;
-    private final HttpSessionSecurityContextRepository sessionSecurityContextRepository= new HttpSessionSecurityContextRepository();
-
-    @PostMapping("/login")
-    public Authentication login(@RequestBody LoginRequest loginRequest, HttpServletRequest request, HttpServletResponse response){
-        UsernamePasswordAuthenticationToken token =
-            UsernamePasswordAuthenticationToken.unauthenticated(loginRequest.getUsername(),loginRequest.getPassword());
-        Authentication authenticate = authenticationManager.authenticate(token);
-        SecurityContext securityContext = SecurityContextHolder.getContextHolderStrategy()
-            .createEmptyContext();
-        securityContext.setAuthentication(authenticate);
-
-        SecurityContextHolder.getContextHolderStrategy().setContext(securityContext); // threadlocal에 저장
-
-        sessionSecurityContextRepository.saveContext(securityContext,request,response);
-        return authenticate;
-
-    }
+//    private final AuthenticationManager authenticationManager;
+//    private final HttpSessionSecurityContextRepository sessionSecurityContextRepository= new HttpSessionSecurityContextRepository();
+//
+//    @PostMapping("/login")
+//    public Authentication login(@RequestBody LoginRequest loginRequest, HttpServletRequest request, HttpServletResponse response){
+//        UsernamePasswordAuthenticationToken token =
+//            UsernamePasswordAuthenticationToken.unauthenticated(loginRequest.getUsername(),loginRequest.getPassword());
+//        Authentication authenticate = authenticationManager.authenticate(token);
+//        SecurityContext securityContext = SecurityContextHolder.getContextHolderStrategy()
+//            .createEmptyContext();
+//        securityContext.setAuthentication(authenticate);
+//
+//        SecurityContextHolder.getContextHolderStrategy().setContext(securityContext); // threadlocal에 저장
+//
+//        sessionSecurityContextRepository.saveContext(securityContext,request,response);
+//        return authenticate;
+//
+//    }
 
 
 

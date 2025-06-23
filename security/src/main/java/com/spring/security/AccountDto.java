@@ -5,8 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 
-@Getter
 @AllArgsConstructor
+@Getter
 public class AccountDto {
 
     private String username;
